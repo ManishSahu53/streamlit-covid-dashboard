@@ -273,6 +273,14 @@ if what == 'Infection':
     rule = st.selectbox('Variables', ['Daily Recovery', 'Daily New Cases', 'Daily Deaths', 'Daily Test', 'Daily Active Cases'])
     st.plotly_chart(custom_plot.summary(data_state_cls.data, rule), use_container_width=True)
 
+
+
+    st.write("**:beer: Buy me a [beer])**")
+    expander = st.beta_expander("This app is developed by Manish Sahu.")
+    expander.write("Contact me on [Linkedin](https://www.linkedin.com/in/manishsahuiitbhu/)")
+    expander.write("The source code is on [GitHub](https://github.com/ManishSahu53/streamlit-covid-dashboard)")
+
+
 ##################################### MATPLOTLIB ########################################
 # fig = plt.figure(figsize=(10, 5))
 # plt.title(f'Average Growth Rate of Active Cases ({ma_day} Day Moving Average)')

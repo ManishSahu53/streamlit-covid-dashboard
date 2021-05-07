@@ -5,6 +5,13 @@ import json
 import logging
 import os
 
+# import joblib
+import os
+import json
+import numpy as np
+import logging
+
+
 
 # Creating Param class
 class Params():
@@ -134,17 +141,6 @@ def getNamenoExt(path_tif):
         Return base name of file from path/complete name of file
     """
     return (os.path.splitext(os.path.basename(path_tif))[0])    
-
-
-# import joblib
-import os
-import json
-import gdal
-import numpy as np
-
-import logging
-import boto3
-from botocore.exceptions import ClientError
 
 
 # Loading model

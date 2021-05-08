@@ -246,8 +246,12 @@ if what == 'Infection':
                         yanchor="bottom",
                         y=1.02,
                         xanchor="right",
-                        x=1,   
-                    ))
+                        x=1    
+                    ),
+                    xaxis_fixedrange = True,
+                    yaxis_fixedrange = True,
+                    dragmode= False
+                    )
     st.plotly_chart(fig2, use_container_width=True)
 
 
@@ -279,7 +283,10 @@ if what == 'Infection':
                 line_dash="dash", 
                 line_color="Red")
 
-    fig.update_layout(legend = dict(bgcolor = 'rgba(0,0,0,0)'))
+    fig.update_layout(legend = dict(bgcolor = 'rgba(0,0,0,0)'),
+                      xaxis_fixedrange = True,
+                      yaxis_fixedrange = True,
+                      dragmode= False,)
     st.plotly_chart(fig, use_container_width=True)
 
 

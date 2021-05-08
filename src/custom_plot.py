@@ -117,6 +117,9 @@ def summary(data, what):
         height=800*nrow/5,
         autosize=True,
         hovermode="x unified",
+        xaxis_fixedrange = True,
+        yaxis_fixedrange = True,
+        dragmode= False,
     )
     PALETTE = get_default_palette()  # get_default_palette()
     for i in fig['layout']['annotations']:
@@ -172,7 +175,9 @@ def plot_bar(x, y=[], name=[], title='Total Vaccinated'):
                                 titlefont_size=16,
                                 tickfont_size=14,
                             ),
+                    xaxis_fixedrange = True,
+                    yaxis_fixedrange = True,
+                    dragmode= False,
 
                     )
-    
     return fig

@@ -62,22 +62,22 @@ def calculate_moving_average(data_time_series):
 
 ## Loading Overall Dataset of cases, recoveries
 data_time_series_cls = data_loader.DataCaseOverall(config.path_cases_overall_timeseries)
-data_time_series_cls.preprocess()
+data_time_series_cls.process()
 data_time_series = data_time_series_cls.data
 
 ## Loading State wise Dataset of cases, reoveries
 data_state_cls = data_loader.DataCaseState(config.path_cases_state_wise_timeseries)
-data_state_cls.preprocess()
+data_state_cls.process()
 data_state = data_state_cls.data
 
 ## Loading Overall Dataset of Corona Tests
 data_tested_overall_cls = data_loader.DataTestOverall(config.path_test_overall_timeseries)
-data_tested_overall_cls.preprocess()
+data_tested_overall_cls.process()
 data_tested_overall = data_tested_overall_cls.data
 
 ## Loading State wise Dataset of Corona Tests
 data_tested_state_cls = data_loader.DataTestState(config.path_test_state_wise_timeseries)
-data_tested_state_cls.preprocess()
+data_tested_state_cls.process()
 data_tested_state = data_tested_state_cls.data
 
 ## Positivity Rate
@@ -85,7 +85,11 @@ columns = ['date_str', 'Daily Confirmed', 'daily_test']
 data_positivity = pd.merge(data_time_series_cls.data, data_tested_overall_cls.data, on=['date_str'], how='left')[columns]
 
 data_time_series = calculate_moving_average(data_time_series=data_time_series)
-current_date = datetime.datetime.now() - datetime.timedelta(1, minutes=0, hours=12)
+
+## Calculating Yesterday date
+tzinfo = datetime.timezone(datetime.timedelta(hours=config.TIMEZONE_OFFSET))
+current_date = datetime.datetime.now(tzinfo) - datetime.timedelta(1, minutes=0, hours=12)
+
 logging.info(f'Processing for Date: {current_date}')
 
 default_what_map = {'Infection': 0, 'Vaccines': 1}
@@ -94,8 +98,9 @@ col1, col2, _, col3 = st.beta_columns([2, 2, 8, 1,])
 query_params = st.experimental_get_query_params()
 
 col3.write("**[Linkedin](https://www.linkedin.com/in/manishsahuiitbhu/)<br>[:beer:]**", unsafe_allow_html=True)
-what = col1.radio('Type of Data', ['Infection', 'Vaccines'])
+options = ['Infection', 'Vaccines']
 
+what = col1.radio('Type of Data', options)
 area = col2.selectbox("Region", list(config.POPULATION_MAP.keys()))
 
 if what == 'Infection':
@@ -123,9 +128,18 @@ if what == 'Infection':
                     unsafe_allow_html=True)
         
         if area.lower() == 'india':
-            value = daily_overall['Daily Confirmed'].values[0]
+            try:
+                value = daily_overall['Daily Confirmed'].values[0]
+            except Exception as e:
+                logging.error(f'Error: {e}. Cannot get data for overall India, Date: {current_date}')
+                value = 0
+        
         else:
-            value = data_state['daily_confirmed'].values[0]
+            try:
+                value = data_state['daily_confirmed'].values[0]
+            except Exception as e:
+                logging.error(f'Error: {e}. Cannot get data for State level wise, Date: {current_date}')
+                value = 0
         
         temp_confirmed = custom_plot.normalisation(value, config.POPULATION_MAP[area], rule)
         text = f'{temp_confirmed:.2f}' if config.RULE_MAP[rule] == 'percentage' else f'{int(temp_confirmed):,}'
@@ -281,6 +295,129 @@ if what == 'Infection':
     expander.write("Contact me on [Linkedin](https://www.linkedin.com/in/manishsahuiitbhu/)")
     expander.write("The source code is on [GitHub](https://github.com/ManishSahu53/streamlit-covid-dashboard)")
 
+elif what == 'Vaccines':
+    ## Loading Vaccine Dataset
+    data_vaccine_cls = data_loader.DataVaccineState(config.path_vaccine_state_wise_cowin)
+    data_vaccine_cls.process()
+
+    st.header('Real time data updated till {}'.format(current_date.strftime('%Y-%m-%d')))
+
+    # Loading Full india or State wise
+    data_vaccine = data_vaccine_cls.data[data_vaccine_cls.data['State'] == area]
+
+    pie1, title1, line, pie2, title2, title3, title4 = st.beta_columns([2, 4, 1, 2, 4, 4, 4])
+    line.markdown(LINE, unsafe_allow_html=True)
+
+    with pie1:
+        total_population = config.POPULATION_MAP[area]
+        vaccine_population = data_vaccine['Total Individuals Vaccinated'].values[-1]
+        labels = ['Population Vaccinated',  'Populaton not Vaccinated']
+        x = vaccine_population
+        y = total_population - vaccine_population
+        
+        st.plotly_chart(custom_plot.plot_population(x, y, labels, area), use_container_width=True)
+
+    with title1:
+        st.markdown("<h3 style='text-align: center;'>Total Person Vaccinated</h2>",
+                    unsafe_allow_html=True)
+        
+        value = int(data_vaccine['Total Individuals Vaccinated'].values[-1])
+        st.markdown(f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
+
+    with pie2:
+        x = data_vaccine['Total Covaxin Administered'].values[-1]
+        y = data_vaccine['Total CoviShield Administered'].values[-1]
+        labels = ['Covaxin Vaccine',  'CovidShield Vaccine']
+        st.plotly_chart(custom_plot.plot_population(x, y, labels, area), use_container_width=True)
+
+    with title2:
+        st.markdown("<h3 style='text-align: center;'>Daily Vaccinated</h2>",
+                    unsafe_allow_html=True)
+        value = int(data_vaccine['daily_vaccine'].values[-1])
+        st.markdown(f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
+
+    with title3:
+        st.markdown("<h3 style='text-align: center;'>Total Vaccine Sites</h2>",
+                    unsafe_allow_html=True)
+        value = int(data_vaccine['Total Sites '].values[-1])
+        st.markdown(f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
+
+    with title4:
+        st.markdown("<h3 style='text-align: center;'>Fully Vaccinated</h2>",
+                    unsafe_allow_html=True)
+        value = int(data_vaccine['Second Dose Administered'].values[-1])
+        st.markdown(f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
+
+
+
+    col1, col2 = st.beta_columns(2)
+
+    with col1:
+        x = data_vaccine['date_str'].values
+        y = [data_vaccine['daily_first'].values, data_vaccine['daily_second'].values] 
+        names = ['First Dose', 'Second Dose']
+        title = 'Total Vaccinated'
+        col1.plotly_chart(custom_plot.plot_bar(x=x, y=y, name=names, title=title), use_container_width=True)
+
+#     with col2:
+#         vacc_area = vaccines.deliveries[vaccines.deliveries.area == area]
+#         fornitori = plot.np.unique(vacc_area.fornitore)
+#         data_list = [vacc_area[vacc_area.fornitore == fornitori[0]].numero_dosi]
+#         population = vaccines.administration.popolazione[vaccines.administration.area == area]
+#         names = ['Numero dosi consegnate']
+#         col2.plotly_chart(plot.plot_deliveries(
+#             vacc_area,
+#             population=population,
+#             subplot_title='Dosi di vaccino consegnate',
+#             unita=100000
+#         ), use_container_width=True)
+
+#     st.subheader(f"Dettaglio andamenti {area}")
+#     col1, _, col2, col3, _ = st.beta_columns([1, 2, 1, 1, 1])
+#     status = col1.selectbox('', ['Giornaliero', 'Cumulato'])
+#     fascia_anagrafica = col2.selectbox('Seleziona fascia anagrafica', ['16-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'], index=7)
+#     dose = col3.selectbox('Seleziona dose', ['prima dose', 'seconda dose'])
+#     if status == 'Cumulato':
+#         cumulate = True
+#     else:
+#         cumulate = False
+#     col1, col2 = st.beta_columns(2)
+#     col1.plotly_chart(plot.ages_timeseries(vaccines.raw, area, cumulate=cumulate), use_container_width=True)
+#     col2.plotly_chart(plot.age_timeseries(vaccines.raw, area, fascia_anagrafica, demography, dose=dose, cumulate=cumulate), use_container_width=True)
+
+#     col1, col2 = st.beta_columns(2)
+#     col2.plotly_chart(plot.fornitori_timeseries(vaccines.raw, area, cumulate=cumulate), use_container_width=True)
+#     col1.plotly_chart(plot.categories_timeseries(vaccines.administration, area, cumulate=cumulate), use_container_width=True)
+#     # col2.plotly_chart(plot.plot_fill(data_list, [''], population, cumulate=cumulate, unita=100, subplot_title=names[0]), use_container_width=True)
+
+#     col1, col3, col4 = st.beta_columns(3)
+#     with col1:
+#         col1.plotly_chart(plot.plot_ages(vaccines.raw, area), use_container_width=True)
+#     # with col2:
+#     #     col2.plotly_chart(plot.plot_second_dose_percentage(vaccines.administration, area), use_container_width=True)
+#     with col3:
+#         col3.plotly_chart(plot.plot_category(vaccines.administration, area), use_container_width=True)
+#     with col4:
+#         col4.plotly_chart(plot.plot_fornitore(vaccines.deliveries, area), use_container_width=True)
+
+#     st.header('Confronto tra regioni')
+#     col1, _, col2 = st.beta_columns([4, 1, 10])
+#     with col1:
+#         st.subheader('Percentuale popolazione vaccinata')
+#         st.write('')
+#         data = vaccines.administration.groupby('area').sum().seconda_dose / vaccines.administration.groupby('area').mean().popolazione
+#         st.dataframe(data.to_frame().style.background_gradient(cmap='Reds').format("{:.2%}"), height=700)
+#     rule = col2.selectbox('Variabile', ['Percentuale popolazione vaccinata', 'Dosi somministrate', 'Dosi consegnate'])
+#     col2.plotly_chart(plot.vaccines_summary(vaccines, rule), use_container_width=True)
+#     st.write("**:beer: Buy me a [beer](https://www.buymeacoffee.com/francesconazzar)**")
+#     expander = st.beta_expander("This app is developed by Francesco Nazzaro")
+#     expander.write("Contact me on [Twitter](https://twitter.com/effenazzaro)")
+#     expander.write("The source code is on [GitHub](https://github.com/francesconazzaro/covid19-portal)")
+#     expander.write("Raw data")
+#     expander.dataframe(vaccines.raw)
+
+else:
+     st.header(f'Please select from options: {options}')
 
 ##################################### MATPLOTLIB ########################################
 # fig = plt.figure(figsize=(10, 5))

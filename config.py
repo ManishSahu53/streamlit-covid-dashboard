@@ -9,6 +9,7 @@ path_vaccine_state_wise_cowin = 'http://api.covid19india.org/csv/latest/cowin_va
 
 UNIT = 1000000
 POPULATION = 1336459178
+TIMEZONE_OFFSET = 5.50 # +5:30 Indian Time # Pacific Standard Time (UTC−08:00)
 
 RULE_MAP = {
     'Total': 'total',

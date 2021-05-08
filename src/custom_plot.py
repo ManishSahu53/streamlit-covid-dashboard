@@ -87,7 +87,7 @@ def summary_plot_data(region, what, name):
 def summary(data, what):
     titles = list(config.REGION_INDEX.keys())
     titles = sorted(titles)
-    nrow, ncol = 6, 6
+    nrow, ncol = 8, 5
     fig = make_subplots(nrow, ncol, 
                         shared_xaxes='all', shared_yaxes='all', subplot_titles=titles,
                         vertical_spacing=.08)
@@ -114,11 +114,65 @@ def summary(data, what):
         plot_bgcolor="white",
         margin=dict(t=50, l=10, b=50, r=10),
         # width=1300,
-        height=600,
+        height=800*nrow/5,
         autosize=True,
         hovermode="x unified",
     )
     PALETTE = get_default_palette()  # get_default_palette()
     for i in fig['layout']['annotations']:
         i['font'] = dict(size=12, color=next(PALETTE))
+    return fig
+
+
+
+
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def plot_population(x, y, labels, area):
+    pie = go.Pie(
+        values=[x, y],
+        labels=labels,
+        textinfo='percent',
+    )
+    fig = make_subplots(1)
+    fig.add_trace(pie)
+    fig.update({'layout_showlegend': False})
+    fig.update_layout(legend={
+        'yanchor': "bottom",
+        'y': -.3,  # top
+        'xanchor': "center",
+        'x': .5,
+    }, height=150, margin=dict(
+        l=0,
+        r=0,
+        b=0,
+        t=30,
+        pad=0
+    ),
+    )
+    return fig
+
+
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def plot_bar(x, y=[], name=[], title='Total Vaccinated'):
+    
+    go_fig = []
+    for i in range(len(y)):
+        go_fig.append(go.Bar(name=name[i] ,x=x, y=y[i]),)
+
+    fig = go.Figure(data=go_fig)
+    fig.update_layout(#barmode='stack',
+                    legend=dict(
+                                x=0,
+                                y=1.0,
+                                bgcolor='rgba(255, 255, 255, 0)',
+                                bordercolor='rgba(255, 255, 255, 0)'
+                            ),
+                    yaxis=dict(
+                                title=title,
+                                titlefont_size=16,
+                                tickfont_size=14,
+                            ),
+
+                    )
+    
     return fig

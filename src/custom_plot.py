@@ -14,7 +14,7 @@ import config
 @st.cache(show_spinner=False)
 def normalisation(data, population, rule):
     if config.RULE_MAP[rule] == 'percentage':
-        new_data = (int(data) / int(population) )* int(config.UNIT)
+        new_data = (int(data) / int(population)) * int(config.UNIT)
         try:
             new_data.name = data.name
         except:
@@ -49,33 +49,34 @@ def get_default_palette(alpha=False):
 
     return itertools.cycle(rgb_palette)
 
+
 @st.cache(show_spinner=False)
 def summary_plot_data(region, what, name):
     mapp = {
-     'Daily Recovery' : 'daily_recovery',
-     'Daily New Cases': 'daily_confirmed',
-     'Daily Deaths': 'daily_deceased',
-     'Daily Test': 'daily_test', 
-     'Daily Active Cases': 'daily_active'
+        'Daily Recovery': 'daily_recovery',
+        'Daily New Cases': 'daily_confirmed',
+        'Daily Deaths': 'daily_deceased',
+        'Daily Test': 'daily_test',
+        'Daily Active Cases': 'daily_active'
     }
     plot_data = region[mapp[what]].rolling(7).mean()
 
     if what == 'Daily Recovery':
         title = "Number of Daily Rocvery"
         yscale = 'log'
-    
+
     elif what == 'Daily New Cases':
         title = "Number Daily New Cases"
         yscale = 'log'
-    
+
     elif what == 'Daily Deaths':
         title = "Daily Number of Deaths"
         yscale = 'log'
-    
+
     elif what == 'Daily Test':
         title = "Number of Daily Tests"
         yscale = 'linear'
-    
+
     elif what == 'Daily Active Cases':
         title = "Net Daily Active Cases"
         yscale = 'log'
@@ -88,7 +89,7 @@ def summary(data, what):
     titles = list(config.REGION_INDEX.keys())
     titles = sorted(titles)
     nrow, ncol = 8, 5
-    fig = make_subplots(nrow, ncol, 
+    fig = make_subplots(nrow, ncol,
                         shared_xaxes='all', shared_yaxes='all', subplot_titles=titles,
                         vertical_spacing=.08)
     minus = 0
@@ -98,7 +99,7 @@ def summary(data, what):
     for i, name in enumerate(titles):
         col = (i - minus) % ncol + 1
         row = (i - minus) // ncol + 1
-        
+
         # logging.info(f'Custom Plot name: {name}')
 
         region = data[data['State'] == name]
@@ -107,8 +108,10 @@ def summary(data, what):
         fig.add_trace(go.Scatter(x=data['date'][-90:], y=plot_data.values[-90:], showlegend=False,
                                  name=name, marker=dict(color=next(PALETTE)), fill='tozeroy'), row, col)
 
-    fig.update_xaxes(showgrid=True, gridwidth=1, tickangle=45, gridcolor='LightGrey')
-    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='LightGrey', range=[0, max(maxs)])
+    fig.update_xaxes(showgrid=True, gridwidth=1,
+                     tickangle=45, gridcolor='LightGrey')
+    fig.update_yaxes(showgrid=True, gridwidth=1,
+                     gridcolor='LightGrey', range=[0, max(maxs)])
     fig.update_layout(
         title=title,
         plot_bgcolor="white",
@@ -117,9 +120,9 @@ def summary(data, what):
         height=800*nrow/5,
         autosize=True,
         hovermode="x unified",
-        xaxis_fixedrange = True,
-        yaxis_fixedrange = True,
-        dragmode= False,
+        xaxis_fixedrange=True,
+        yaxis_fixedrange=True,
+        dragmode=False,
     )
     PALETTE = get_default_palette()  # get_default_palette()
     for i in fig['layout']['annotations']:
@@ -127,57 +130,92 @@ def summary(data, what):
     return fig
 
 
-
-
 @st.cache(allow_output_mutation=True, show_spinner=False)
-def plot_population(x, y, labels, area):
+def plot_population(values, labels, area,
+                    legend=False, height=150, t=30):
     pie = go.Pie(
-        values=[x, y],
+        values=values,
         labels=labels,
         textinfo='percent',
     )
     fig = make_subplots(1)
     fig.add_trace(pie)
-    fig.update({'layout_showlegend': False})
-    fig.update_layout(legend={
-        'yanchor': "bottom",
-        'y': -.3,  # top
-        'xanchor': "center",
-        'x': .5,
-    }, height=150, margin=dict(
-        l=0,
-        r=0,
-        b=0,
-        t=30,
-        pad=0
-    ),
+    fig.update({'layout_showlegend': legend})
+    fig.update_layout(
+        #     legend={
+        #     'yanchor': "bottom",
+        #     'y': -.3,  # top
+        #     'xanchor': "center",
+        #     'x': .5,
+        # },
+        height=height, margin=dict(
+            l=0,
+            r=0,
+            b=0,
+            t=t,
+            pad=0
+        ),
     )
     return fig
 
 
 @st.cache(allow_output_mutation=True, show_spinner=False)
 def plot_bar(x, y=[], name=[], title='Total Vaccinated'):
-    
+
     go_fig = []
     for i in range(len(y)):
-        go_fig.append(go.Bar(name=name[i] ,x=x, y=y[i]),)
+        go_fig.append(go.Bar(name=name[i], x=x, y=y[i]),)
 
     fig = go.Figure(data=go_fig)
-    fig.update_layout(#barmode='stack',
-                    legend=dict(
-                                x=0,
-                                y=1.0,
-                                bgcolor='rgba(255, 255, 255, 0)',
-                                bordercolor='rgba(255, 255, 255, 0)'
-                            ),
-                    yaxis=dict(
-                                title=title,
-                                titlefont_size=16,
-                                tickfont_size=14,
-                            ),
-                    xaxis_fixedrange = True,
-                    yaxis_fixedrange = True,
-                    dragmode= False,
-
-                    )
+    fig.update_layout(  # barmode='stack',
+        legend=dict(
+                        x=0,
+                        y=1.0,
+                        bgcolor='rgba(255, 255, 255, 0)',
+                        bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        yaxis=dict(
+            title=title,
+            titlefont_size=16,
+            tickfont_size=14,
+        ),
+        xaxis_fixedrange=True,
+        yaxis_fixedrange=True,
+        dragmode=False,
+        plot_bgcolor="white",
+    )
     return fig
+
+
+##################################### MATPLOTLIB ########################################
+# fig = plt.figure(figsize=(10, 5))
+# plt.title(f'Average Growth Rate of Active Cases ({ma_day} Day Moving Average)')
+# plt.plot(data_time_series['Date'].values, 100*data_time_series['percent_growth_active_case'].values)
+
+# # ax.vlines([20, 100], 0, 1, linestyles='dashed', colors='red')
+# plt.hlines(0, xmin=data_time_series['Date'].values[0],
+#            xmax= data_time_series['Date'].values[n-1],
+#            linestyles='dashed',
+#            colors='Green',
+#            label='Recovery > Active Case')
+
+# plt.vlines(x=data_time_series['Date'].values[320],
+#            ymin=-4,
+#            ymax=15,
+#            colors='Red',
+#            linestyles='dashed',
+#            label='2nd Wave',)
+
+# plt.vlines(x=data_time_series['Date'].values[165],
+#            ymin=-4,
+#            ymax=15,
+#            colors='Orange',
+#            linestyles='dashed',
+#            label='Decline in new cases',)
+
+
+# plt.ylabel('% Growth of Active Cases')
+# plt.xticks(rotation=90)
+# plt.legend()
+
+# st.line_chart(fig)

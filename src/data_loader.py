@@ -5,52 +5,58 @@ import datetime
 import logging
 import numpy as np
 
+
 class DataCaseOverall:
     def __init__(self, path_data):
         try:
             self.path_data = path_data
             self.data = self.load_data(path_data)
-            self.data['date'] = self.data['Date_YMD'].apply(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
-            self.data['date_str'] = self.data['date'].apply(lambda x: x.strftime("%d-%m-%Y"))
+            self.data['date'] = self.data['Date_YMD'].apply(
+                lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
+            self.data['date_str'] = self.data['date'].apply(
+                lambda x: x.strftime("%d-%m-%Y"))
 
         except:
             st.error("Deployment in Progress! Please try again after sometimes.")
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
-    
+
     # @st.cache(ttl=60*60*24, allow_output_mutation=True)
     def load_data(self, path_data):
         return pd.read_csv(path_data)
-        
+
     # @st.cache
     def preprocess(self):
         n = len(self.data)
         self.data = self.data[self.data['Total Confirmed'] > 1000]
         self.data['daily_confirmed'] = self.data['Daily Confirmed']
-        self.data['total_active'] = self.data['Total Confirmed'] - self.data['Daily Recovered'] - self.data['Total Deceased']
+        self.data['total_active'] = self.data['Total Confirmed'] - \
+            self.data['Daily Recovered'] - self.data['Total Deceased']
         self.data['daily_recovered'] = self.data['Daily Recovered']
 
     # @st.cache
     def process(self):
         # Preprocessing dataset
         self.preprocess()
-        
+
 
 class DataCaseState:
     def __init__(self, path_data):
         try:
             self.path_data = path_data
             self.data = self.load_data(path_data)
-            self.data['date'] = self.data['Date'].apply(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
-            self.data['date_str'] = self.data['date'].apply(lambda x: x.strftime("%d-%m-%Y"))
+            self.data['date'] = self.data['Date'].apply(
+                lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
+            self.data['date_str'] = self.data['date'].apply(
+                lambda x: x.strftime("%d-%m-%Y"))
 
         except:
             st.error("Deployment in Progress! Please try again after sometimes.")
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
-    
+
     # @st.cache(ttl=60*60*24, allow_output_mutation=True)
     def load_data(self, path_data):
         return pd.read_csv(path_data)
@@ -86,22 +92,23 @@ class DataCaseState:
                 daily_death.append(total_death[i])
                 daily_test.append(total_tested[i])
 
-            
         self.data['daily_recovery'] = daily_recovery
         self.data['daily_confirmed'] = daily_case
         self.data['daily_deceased'] = daily_death
         self.data['daily_test'] = daily_test
-        
-        self.data['daily_active'] = self.data['daily_confirmed'] - self.data['daily_recovery'] -self.data['daily_deceased']
-        self.data['total_active'] = (self.data[f'Confirmed'] - self.data['Recovered']) -self.data['Deceased']
-        # Growth data    
-        self.data['percent_growth_active_case'] = np.round(self.data[f'daily_active']/self.data['total_active'], 4)
+
+        self.data['daily_active'] = self.data['daily_confirmed'] - \
+            self.data['daily_recovery'] - self.data['daily_deceased']
+        self.data['total_active'] = (
+            self.data[f'Confirmed'] - self.data['Recovered']) - self.data['Deceased']
+        # Growth data
+        self.data['percent_growth_active_case'] = np.round(
+            self.data[f'daily_active']/self.data['total_active'], 4)
 
     # @st.cache
     def process(self):
         # Preprocessing dataset
         self.preprocess()
-        
 
 
 class DataTestState:
@@ -113,21 +120,24 @@ class DataTestState:
             n = len(self.data)
             self.data = self.data.dropna(subset=['Updated On'])
             n2 = len(self.data)
-            logging.info(f'Number of NaNs in state wise testing on Updated on column: {n2-n}')
+            logging.info(
+                f'Number of NaNs in state wise testing on Updated on column: {n2-n}')
 
-            self.data['date'] = self.data['Updated On'].apply(lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
-            self.data['date_str'] = self.data['date'].apply(lambda x: x.strftime("%d-%m-%Y"))
+            self.data['date'] = self.data['Updated On'].apply(
+                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+            self.data['date_str'] = self.data['date'].apply(
+                lambda x: x.strftime("%d-%m-%Y"))
 
         except:
             st.error("Deployment in Progress! Please try again after sometimes.")
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
-    
+
     # @st.cache(ttl=60*60*24, allow_output_mutation=True)
     def load_data(self, path_data):
         return pd.read_csv(path_data)
-    
+
     # @st.cache
     def preprocess(self):
         self.data['Total Tested'] = self.data['Total Tested'].fillna(0)
@@ -144,14 +154,14 @@ class DataTestState:
                 daily_test.append(total_test[i] - total_test[i-1])
             else:
                 daily_test.append(total_test[i])
-            
+
         self.data['daily_test'] = daily_test
-    
+
     # @st.cache
     def process(self):
         # Preprocessing dataset
         self.preprocess()
-        
+
 
 class DataTestOverall:
     def __init__(self, path_data):
@@ -161,17 +171,20 @@ class DataTestOverall:
             n1 = len(self.data)
             self.data = self.data.dropna(subset=['Tested As Of'])
             n2 = len(self.data)
-            logging.info(f'Number of NaNs removed in Overall Test Data on Tested As Of : {n2-n1}')
+            logging.info(
+                f'Number of NaNs removed in Overall Test Data on Tested As Of : {n2-n1}')
 
-            self.data['Date'] = self.data['Tested As Of'].apply(lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
-            self.data['date_str'] = self.data['Date'].apply(lambda x: x.strftime("%d-%m-%Y"))
+            self.data['Date'] = self.data['Tested As Of'].apply(
+                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+            self.data['date_str'] = self.data['Date'].apply(
+                lambda x: x.strftime("%d-%m-%Y"))
 
         except Exception as e:
             st.error("Deployment in Progress! Please try again after sometimes.")
             error = st.beta_expander(f"Error Details, Error: {e}")
             error.error(traceback.format_exc())
             st.stop()
-    
+
     # @st.cache(ttl=60*60*24, allow_output_mutation=True)
     def load_data(self, path_data):
         return pd.read_csv(path_data)
@@ -179,12 +192,12 @@ class DataTestOverall:
     # @st.cache
     def preprocess(self):
         self.data['daily_test'] = self.data['Sample Reported today']
-    
+
     # @st.cache
     def process(self):
         # Preprocessing dataset
         self.preprocess()
-        
+
 
 class DataVaccineState:
     def __init__(self, path_data):
@@ -195,10 +208,13 @@ class DataVaccineState:
             n1 = len(self.data)
             self.data = self.data.dropna(subset=['Updated On'])
             n2 = len(self.data)
-            logging.info(f'Number of NaNs removed in Overall Vaccine Data on Tested As Of : {n2-n1}')
+            logging.info(
+                f'Number of NaNs removed in Overall Vaccine Data on Tested As Of : {n2-n1}')
 
-            self.data['date'] = self.data['Updated On'].apply(lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
-            self.data['date_str'] = self.data['date'].apply(lambda x: x.strftime("%d-%m-%Y"))
+            self.data['date'] = self.data['Updated On'].apply(
+                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+            self.data['date_str'] = self.data['date'].apply(
+                lambda x: x.strftime("%d-%m-%Y"))
 
             self.data.fillna(0, inplace=True)
             # self.data['date'] = self.data['Date_YMD'].apply(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
@@ -209,16 +225,16 @@ class DataVaccineState:
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
-    
+
     # @st.cache(ttl=60*60*24, allow_output_mutation=True)
     def load_data(self, path_data):
         return pd.read_csv(path_data)
-        
+
     # @st.cache
     def preprocess(self):
         self.data.sort_values(by=['State', 'date'], inplace=True)
         n = len(self.data)
-        
+
         total_vaccine = self.data['Total Doses Administered'].values
         total_covaxin = self.data['Total Covaxin Administered'].values
         total_covidshield = self.data['Total Covaxin Administered'].values
@@ -242,7 +258,7 @@ class DataVaccineState:
         daily_vaccine = [total_vaccine[0]]
         daily_covaxin = [total_covaxin[0]]
         daily_covidshield = [total_covidshield[0]]
-        
+
         daily_18_30 = [total_18_30[0]]
         daily_30_45 = [total_30_45[0]]
         daily_45_60 = [total_45_60[0]]
@@ -261,7 +277,8 @@ class DataVaccineState:
             if states[i] == states[i-1]:
                 daily_vaccine.append(total_vaccine[i] - total_vaccine[i-1])
                 daily_covaxin.append(total_covaxin[i] - total_covaxin[i-1])
-                daily_covidshield.append(total_covidshield[i] - total_covidshield[i-1])
+                daily_covidshield.append(
+                    total_covidshield[i] - total_covidshield[i-1])
 
                 daily_18_30.append(total_18_30[i] - total_18_30[i-1])
                 daily_30_45.append(total_30_45[i] - total_30_45[i-1])
@@ -295,7 +312,6 @@ class DataVaccineState:
                 daily_second.append(total_second[i])
 
                 daily_sites.append(total_sites[i])
-            
 
         self.data['total_vaccine'] = total_vaccine
         self.data['total_covaxin'] = total_covaxin
@@ -318,10 +334,9 @@ class DataVaccineState:
         self.data['daily_second'] = daily_second
 
         self.data['daily_sites'] = daily_sites
-        
 
     # @st.cache
+
     def process(self):
         # Preprocessing dataset
         self.preprocess()
-        

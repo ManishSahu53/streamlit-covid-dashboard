@@ -36,7 +36,7 @@ LINE = """<style>
 <div class="vl"></div>"""
 
 
-
+@st.cache(ttl=60*60*24, allow_output_mutation=True)
 def calculate_moving_average(data_time_series):
     n = len(data_time_series)
     feature = ['Daily Confirmed', 'Total Confirmed', 'Daily Recovered', 'Total Recovered', 'Daily Deceased', 'Total Deceased']
@@ -86,6 +86,7 @@ data_positivity = pd.merge(data_time_series_cls.data, data_tested_overall_cls.da
 
 data_time_series = calculate_moving_average(data_time_series=data_time_series)
 current_date = datetime.datetime.now() - datetime.timedelta(1, minutes=0, hours=12)
+logging.info(f'Processing for Date: {current_date}')
 
 default_what_map = {'Infection': 0, 'Vaccines': 1}
 

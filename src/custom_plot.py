@@ -49,7 +49,7 @@ def get_default_palette(alpha=False):
 
     return itertools.cycle(rgb_palette)
 
-
+@st.cache(show_spinner=False)
 def summary_plot_data(region, what, name):
     mapp = {
      'Daily Recovery' : 'daily_recovery',

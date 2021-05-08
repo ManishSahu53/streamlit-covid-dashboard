@@ -5,12 +5,11 @@ import datetime
 import logging
 import numpy as np
 
-
 class DataCaseOverall:
     def __init__(self, path_data):
         try:
             self.path_data = path_data
-            self.data = pd.read_csv(path_data)
+            self.data = self.load_data(path_data)
             self.data['date'] = self.data['Date_YMD'].apply(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
             self.data['date_str'] = self.data['date'].apply(lambda x: x.strftime("%d-%m-%Y"))
 
@@ -19,6 +18,11 @@ class DataCaseOverall:
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
+    
+    @st.cache(ttl=60*60*24, allow_output_mutation=True)
+    def load_data(self, path_data):
+        return pd.read_csv(path_data)
+        
     # @st.cache
     def preprocess(self):
         n = len(self.data)
@@ -37,7 +41,7 @@ class DataCaseState:
     def __init__(self, path_data):
         try:
             self.path_data = path_data
-            self.data = pd.read_csv(path_data)
+            self.data = self.load_data(path_data)
             self.data['date'] = self.data['Date'].apply(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
             self.data['date_str'] = self.data['date'].apply(lambda x: x.strftime("%d-%m-%Y"))
 
@@ -46,6 +50,10 @@ class DataCaseState:
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
+    
+    @st.cache(ttl=60*60*24, allow_output_mutation=True)
+    def load_data(self, path_data):
+        return pd.read_csv(path_data)
 
     # @st.cache
     def preprocess(self):
@@ -100,7 +108,7 @@ class DataTestState:
     def __init__(self, path_data):
         try:
             self.path_data = path_data
-            self.data = pd.read_csv(path_data)
+            self.data = self.load_data(path_data)
 
             n = len(self.data)
             self.data = self.data.dropna(subset=['Updated On'])
@@ -115,7 +123,11 @@ class DataTestState:
             error = st.beta_expander("Error Details")
             error.error(traceback.format_exc())
             st.stop()
-
+    
+    @st.cache(ttl=60*60*24, allow_output_mutation=True)
+    def load_data(self, path_data):
+        return pd.read_csv(path_data)
+    
     # @st.cache
     def preprocess(self):
         self.data['Total Tested'] = self.data['Total Tested'].fillna(0)
@@ -145,7 +157,7 @@ class DataTestOverall:
     def __init__(self, path_data):
         try:
             self.path_data = path_data
-            self.data = pd.read_csv(path_data)
+            self.data = self.load_data(path_data)
             n1 = len(self.data)
             self.data = self.data.dropna(subset=['Tested As Of'])
             n2 = len(self.data)
@@ -159,6 +171,10 @@ class DataTestOverall:
             error = st.beta_expander(f"Error Details, Error: {e}")
             error.error(traceback.format_exc())
             st.stop()
+    
+    @st.cache(ttl=60*60*24, allow_output_mutation=True)
+    def load_data(self, path_data):
+        return pd.read_csv(path_data)
 
     # @st.cache
     def preprocess(self):

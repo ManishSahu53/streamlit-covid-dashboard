@@ -1,9 +1,12 @@
-import pandas as pd
-import streamlit as st
 import traceback
 import datetime
 import logging
+
 import numpy as np
+import pandas as pd
+import streamlit as st
+
+import config
 
 
 class DataCaseOverall:
@@ -12,7 +15,7 @@ class DataCaseOverall:
             self.path_data = path_data
             self.data = self.load_data(path_data)
             self.data['date'] = self.data['Date_YMD'].apply(
-                lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
+                lambda x: datetime.datetime.strptime(x, "%Y-%m-%d").astimezone(config.tzinfo))
             self.data['date_str'] = self.data['date'].apply(
                 lambda x: x.strftime("%d-%m-%Y"))
 
@@ -47,7 +50,7 @@ class DataCaseState:
             self.path_data = path_data
             self.data = self.load_data(path_data)
             self.data['date'] = self.data['Date'].apply(
-                lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"))
+                lambda x: datetime.datetime.strptime(x, "%Y-%m-%d").astimezone(config.tzinfo))
             self.data['date_str'] = self.data['date'].apply(
                 lambda x: x.strftime("%d-%m-%Y"))
 
@@ -120,11 +123,13 @@ class DataTestState:
             n = len(self.data)
             self.data = self.data.dropna(subset=['Updated On'])
             n2 = len(self.data)
+            self.data.fillna(0, inplace=True)
+
             logging.info(
-                f'Number of NaNs in state wise testing on Updated on column: {n2-n}')
+                f'Number of NaNs in state wise testing on Updated on column: {n-n2}')
 
             self.data['date'] = self.data['Updated On'].apply(
-                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y").astimezone(config.tzinfo))
             self.data['date_str'] = self.data['date'].apply(
                 lambda x: x.strftime("%d-%m-%Y"))
 
@@ -170,13 +175,14 @@ class DataTestOverall:
             self.data = self.load_data(path_data)
             n1 = len(self.data)
             self.data = self.data.dropna(subset=['Tested As Of'])
+            self.data.fillna(0, inplace=True)
             n2 = len(self.data)
             logging.info(
-                f'Number of NaNs removed in Overall Test Data on Tested As Of : {n2-n1}')
+                f'Number of NaNs removed in Overall Test Data on Tested As Of : {n1-n2}')
 
-            self.data['Date'] = self.data['Tested As Of'].apply(
-                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
-            self.data['date_str'] = self.data['Date'].apply(
+            self.data['date'] = self.data['Tested As Of'].apply(
+                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y").astimezone(config.tzinfo))
+            self.data['date_str'] = self.data['date'].apply(
                 lambda x: x.strftime("%d-%m-%Y"))
 
         except Exception as e:
@@ -212,7 +218,7 @@ class DataVaccineState:
                 f'Number of NaNs removed in Overall Vaccine Data on Tested As Of : {n2-n1}')
 
             self.data['date'] = self.data['Updated On'].apply(
-                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y"))
+                lambda x: datetime.datetime.strptime(x, "%d/%m/%Y").astimezone(config.tzinfo))
             self.data['date_str'] = self.data['date'].apply(
                 lambda x: x.strftime("%d-%m-%Y"))
 
@@ -275,24 +281,24 @@ class DataVaccineState:
 
         for i in range(1, n):
             if states[i] == states[i-1]:
-                daily_vaccine.append(total_vaccine[i] - total_vaccine[i-1])
-                daily_covaxin.append(total_covaxin[i] - total_covaxin[i-1])
-                daily_covidshield.append(
-                    total_covidshield[i] - total_covidshield[i-1])
+                daily_vaccine.append(max(total_vaccine[i] - total_vaccine[i-1], 0))
+                daily_covaxin.append(max(total_covaxin[i] - total_covaxin[i-1], 0))
+                daily_covidshield.append(max(
+                    total_covidshield[i] - total_covidshield[i-1], 0))
 
-                daily_18_30.append(total_18_30[i] - total_18_30[i-1])
-                daily_30_45.append(total_30_45[i] - total_30_45[i-1])
-                daily_45_60.append(total_45_60[i] - total_45_60[i-1])
-                daily_60_100.append(total_60_100[i] - total_60_100[i-1])
+                daily_18_30.append(max(total_18_30[i] - total_18_30[i-1], 0))
+                daily_30_45.append(max(total_30_45[i] - total_30_45[i-1], 0))
+                daily_45_60.append(max(total_45_60[i] - total_45_60[i-1], 0))
+                daily_60_100.append(max(total_60_100[i] - total_60_100[i-1], 0))
 
-                daily_male.append(total_male[i] - total_male[i-1])
-                daily_female.append(total_female[i] - total_female[i-1])
-                daily_trans.append(total_trans[i] - total_trans[i-1])
+                daily_male.append(max(total_male[i] - total_male[i-1], 0))
+                daily_female.append(max(total_female[i] - total_female[i-1], 0))
+                daily_trans.append(max(total_trans[i] - total_trans[i-1], 0))
 
-                daily_first.append(total_first[i] - total_first[i-1])
-                daily_second.append(total_second[i] - total_second[i-1])
+                daily_first.append(max(total_first[i] - total_first[i-1], 0))
+                daily_second.append(max(total_second[i] - total_second[i-1], 0))
 
-                daily_sites.append(total_sites[i] - total_sites[i-1])
+                daily_sites.append(max(total_sites[i] - total_sites[i-1], 0))
 
             else:
                 daily_vaccine.append(total_vaccine[i])

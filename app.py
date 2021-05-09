@@ -20,7 +20,6 @@ st.set_page_config(page_title='COVID-19 India Dashboard',
                    page_icon=":chart_with_upwards_trend:",
                    layout='wide', initial_sidebar_state='collapsed')
 
-
 st.title('COVID-19: Situation in India', )
 
 LINE = """<style>
@@ -99,9 +98,8 @@ data_positivity = pd.merge(data_time_series_cls.data, data_tested_overall_cls.da
 data_time_series = calculate_moving_average(data_time_series=data_time_series)
 
 # Calculating Yesterday date
-tzinfo = datetime.timezone(datetime.timedelta(hours=config.TIMEZONE_OFFSET))
 current_date = datetime.datetime.now(
-    tzinfo) - datetime.timedelta(1, minutes=0, hours=12)
+    config.tzinfo) - datetime.timedelta(1, minutes=0, hours=12)
 
 logging.info(f'Processing for Date: {current_date}')
 
@@ -339,8 +337,8 @@ elif what == 'Vaccines':
         current_date.strftime('%Y-%m-%d')))
 
     # Loading Full india or State wise
-    data_vaccine = data_vaccine_cls.data[data_vaccine_cls.data['State'] == area]
-
+    data_vaccine = data_vaccine_cls.data[(data_vaccine_cls.data['State'] == area) & (data_vaccine_cls.data['date'] <= current_date)]
+    
     pie1, title1, line, pie2, title2, title3, title4 = st.beta_columns([
                                                                        2, 4, 1, 2, 4, 4, 4])
     line.markdown(LINE, unsafe_allow_html=True)
@@ -397,6 +395,7 @@ elif what == 'Vaccines':
         st.markdown(
             f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
 
+    ## Time Series dataset
     x = data_vaccine['date'][-90:]
     y = [data_vaccine['daily_first'].values[-90:],
          data_vaccine['daily_second'].values[-90:]]
@@ -474,25 +473,6 @@ elif what == 'Vaccines':
 
         pie3.plotly_chart(custom_plot.plot_population(
             values, labels, area, legend=True, height=200, t=0), use_container_width=True)
-
-
-#     st.subheader(f"Dettaglio andamenti {area}")
-#     col1, _, col2, col3, _ = st.beta_columns([1, 2, 1, 1, 1])
-#     status = col1.selectbox('', ['Giornaliero', 'Cumulato'])
-#     fascia_anagrafica = col2.selectbox('Seleziona fascia anagrafica', ['16-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '90+'], index=7)
-#     dose = col3.selectbox('Seleziona dose', ['prima dose', 'seconda dose'])
-#     if status == 'Cumulato':
-#         cumulate = True
-#     else:
-#         cumulate = False
-#     col1, col2 = st.beta_columns(2)
-#     col1.plotly_chart(plot.ages_timeseries(vaccines.raw, area, cumulate=cumulate), use_container_width=True)
-#     col2.plotly_chart(plot.age_timeseries(vaccines.raw, area, fascia_anagrafica, demography, dose=dose, cumulate=cumulate), use_container_width=True)
-
-#     col1, col2 = st.beta_columns(2)
-#     col2.plotly_chart(plot.fornitori_timeseries(vaccines.raw, area, cumulate=cumulate), use_container_width=True)
-#     col1.plotly_chart(plot.categories_timeseries(vaccines.administration, area, cumulate=cumulate), use_container_width=True)
-#     # col2.plotly_chart(plot.plot_fill(data_list, [''], population, cumulate=cumulate, unita=100, subplot_title=names[0]), use_container_width=True)
 
 
 else:

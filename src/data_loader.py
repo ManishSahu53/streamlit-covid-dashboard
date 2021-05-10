@@ -34,10 +34,18 @@ class DataCaseOverall:
         n = len(self.data)
         self.data = self.data[self.data['Total Confirmed'] > 1000]
         self.data['daily_confirmed'] = self.data['Daily Confirmed']
+        
         self.data['total_active'] = self.data['Total Confirmed'] - \
-            self.data['Daily Recovered'] - self.data['Total Deceased']
+            self.data['Total Recovered'] - self.data['Total Deceased']
+
         self.data['daily_recovered'] = self.data['Daily Recovered']
         self.data['daily_deceased'] = self.data['Daily Deceased']
+
+        self.data['daily_active'] = (
+            self.data[f'daily_confirmed'] - self.data['daily_recovered']) - self.data['daily_deceased']
+        # Growth data
+        self.data['percent_growth_active_case'] = np.round(
+            self.data[f'daily_active']/self.data['total_active'], 4)
 
     # @st.cache
     def process(self):

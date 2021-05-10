@@ -25,7 +25,7 @@ st.title('COVID-19: Situation in India', )
 LINE = """<style>
 .vl {
   border-left: 2px solid black;
-  height: 200px;
+  height: 100px;
   position: absolute;
   left: 50%;
   margin-left: -3px;
@@ -91,11 +91,13 @@ data_tested_state_cls.process()
 data_tested_state = data_tested_state_cls.data
 
 # Positivity Rate
-columns = ['date_str', 'Daily Confirmed', 'daily_test']
-data_positivity = pd.merge(data_time_series_cls.data, data_tested_overall_cls.data, on=[
-                           'date_str'], how='left')[columns]
+columns = ['date', 'daily_confirmed', 'daily_test']
+data_positivity_overall = pd.merge(data_time_series_cls.data, data_tested_overall_cls.data, on=[
+                           'date'], how='left')[columns]
+data_positivity_overall['positivity_rate'] = 100 * data_positivity_overall['daily_confirmed']/data_positivity_overall['daily_test']
 
-data_time_series = calculate_moving_average(data_time_series=data_time_series)
+
+# data_time_series = calculate_moving_average(data_time_series=data_time_series)
 
 # Calculating Yesterday date
 current_date = datetime.datetime.now(
@@ -193,9 +195,9 @@ if what == 'Infection':
                     unsafe_allow_html=True)
 
         if area.lower() == 'india':
-            value = daily_overall['Daily Recovered'].values[0]
+            value = daily_overall['daily_recovered'].values[0]
         else:
-            value = data_state['daily_recovery'].values[0]
+            value = data_state['daily_recovered'].values[0]
 
         temp_recovered = custom_plot.normalisation(
             value, config.POPULATION_MAP[area], rule)
@@ -242,23 +244,48 @@ if what == 'Infection':
 
     if area == 'India':
         graph_data = data_time_series
+        graph_positive_data = data_positivity_overall
     else:
         graph_data = data_state_cls.data[data_state_cls.data['State'] == area]
+        graph_positive_data = data_state_cls.data
+
+    coln, _, _, _, _, _, _ = st.beta_columns([8, 4, 8, 8, 8, 8, 8])
+    type_of_timeseries = coln.selectbox(
+        "", ['Daily Cases', 'Daily Recoveries', 'Daily Deaths', 'Daily Tests', 'Positivity Rate'])
 
     x = graph_data['date'][-365:].values
-    y = graph_data['daily_confirmed'][-365:].values
-    y2 = graph_data['daily_recovered'][-365:].values
+
+    if type_of_timeseries == 'Daily Cases':
+        type_of_timeseries = 'Number of Confirmed Cases'
+        y = graph_data['daily_confirmed'][-365:].values
+
+    elif type_of_timeseries == 'Daily Recoveries':
+        type_of_timeseries = 'Number of Recoveries'
+        y = graph_data['daily_recovered'][-365:].values
+
+    elif type_of_timeseries == 'Daily Deaths':
+        type_of_timeseries = 'Number of Deaths'
+        y = graph_data['daily_deceased'][-365:].values
+
+    elif type_of_timeseries == 'Daily Tests':
+        type_of_timeseries = 'Number of Tests (Moving Average 7)'
+        x = data_tested_overall_cls.data['date'][-365:].values
+        y = data_tested_overall_cls.data['daily_test'].rolling(
+            7).mean()[-365:].values
+
+    elif type_of_timeseries == 'Positivity Rate':
+        x = graph_positive_data['date'][-365:].values
+        y = graph_positive_data['positivity_rate'][-365:].rolling(
+            7).mean()[-365:].values
+
 
     if log:
-        x = x
         y = np.log(y)
-        y2 = np.log(y2)
 
     fig2 = px.line(y=y,
                    x=x,
-                   title='Daily New Cases',
-                   labels={'y': 'Daily New Cases',
-                           'wide_variable_1': 'Daily Rocoveries',
+                   title='Daily Statistics',
+                   labels={'y': type_of_timeseries,
                            'x': 'Time Period'},
                    line_shape='spline',
                    )
@@ -272,7 +299,15 @@ if what == 'Infection':
                    line_width=1,
                    line_dash="dash",
                    line_color="Red")
-
+    
+    fig2.add_hline(y=5,
+                  line_width=1,
+                  line_dash="dash",
+                  line_color="Green",
+                  annotation_text="Required Positivity Rate",
+                  annotation_position="bottom left",
+                  )
+    
     fig2.update_layout(legend=dict(
         orientation="h",
         yanchor="bottom",
@@ -283,8 +318,9 @@ if what == 'Infection':
         xaxis_fixedrange=True,
         yaxis_fixedrange=True,
         dragmode=False,
-        plot_bgcolor="white",
+        plot_bgcolor="white"
     )
+
     st.plotly_chart(fig2, use_container_width=True)
 
     ########################### Second Chart #################################
@@ -337,8 +373,9 @@ elif what == 'Vaccines':
         current_date.strftime('%Y-%m-%d')))
 
     # Loading Full india or State wise
-    data_vaccine = data_vaccine_cls.data[(data_vaccine_cls.data['State'] == area) & (data_vaccine_cls.data['date'] <= current_date)]
-    
+    data_vaccine = data_vaccine_cls.data[(data_vaccine_cls.data['State'] == area) & (
+        data_vaccine_cls.data['date'] <= current_date)]
+
     pie1, title1, line, pie2, title2, title3, title4 = st.beta_columns([
                                                                        2, 4, 1, 2, 4, 4, 4])
     line.markdown(LINE, unsafe_allow_html=True)
@@ -395,7 +432,7 @@ elif what == 'Vaccines':
         st.markdown(
             f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
 
-    ## Time Series dataset
+    # Time Series dataset
     x = data_vaccine['date'][-90:]
     y = [data_vaccine['daily_first'].values[-90:],
          data_vaccine['daily_second'].values[-90:]]

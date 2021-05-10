@@ -53,7 +53,7 @@ def get_default_palette(alpha=False):
 @st.cache(show_spinner=False)
 def summary_plot_data(region, what, name):
     mapp = {
-        'Daily Recovery': 'daily_recovery',
+        'Daily Recovery': 'daily_recovered',
         'Daily New Cases': 'daily_confirmed',
         'Daily Deaths': 'daily_deceased',
         'Daily Test': 'daily_test',
@@ -187,6 +187,32 @@ def plot_bar(x, y=[], name=[], title='Total Vaccinated'):
     return fig
 
 
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def plot_line(x, y=[], name=[], title='Total Vaccinated'):
+
+    go_fig = []
+    for i in range(len(y)):
+        go_fig.append(go.Line(name=name[i], x=x, y=y[i]),)
+
+    fig = go.Figure(data=go_fig)
+    fig.update_layout(  # barmode='stack',
+        legend=dict(
+                        x=0,
+                        y=1.0,
+                        bgcolor='rgba(255, 255, 255, 0)',
+                        bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        yaxis=dict(
+            title=title,
+            titlefont_size=16,
+            tickfont_size=14,
+        ),
+        xaxis_fixedrange=True,
+        yaxis_fixedrange=True,
+        dragmode=False,
+        plot_bgcolor="white",
+    )
+    return fig
 ##################################### MATPLOTLIB ########################################
 # fig = plt.figure(figsize=(10, 5))
 # plt.title(f'Average Growth Rate of Active Cases ({ma_day} Day Moving Average)')

@@ -37,6 +37,7 @@ class DataCaseOverall:
         self.data['total_active'] = self.data['Total Confirmed'] - \
             self.data['Daily Recovered'] - self.data['Total Deceased']
         self.data['daily_recovered'] = self.data['Daily Recovered']
+        self.data['daily_deceased'] = self.data['Daily Deceased']
 
     # @st.cache
     def process(self):
@@ -69,7 +70,6 @@ class DataCaseState:
         self.data.sort_values(by=['State', 'date'], inplace=True)
         n = len(self.data)
 
-        self.data['daily_recovered'] = self.data['Recovered']
         total_case = self.data['Confirmed'].values
         total_recover = self.data['Recovered'].values
         total_death = self.data['Deceased'].values
@@ -95,13 +95,15 @@ class DataCaseState:
                 daily_death.append(total_death[i])
                 daily_test.append(total_tested[i])
 
-        self.data['daily_recovery'] = daily_recovery
+        self.data['daily_recovered'] = daily_recovery
         self.data['daily_confirmed'] = daily_case
         self.data['daily_deceased'] = daily_death
         self.data['daily_test'] = daily_test
+        self.data['positivity_rate'] = np.round(self.data['daily_confirmed']*100/self.data['daily_test'], 1)
+        self.data['positivity_rate'] = self.data['positivity_rate'].fillna(0)
 
         self.data['daily_active'] = self.data['daily_confirmed'] - \
-            self.data['daily_recovery'] - self.data['daily_deceased']
+            self.data['daily_recovered'] - self.data['daily_deceased']
         self.data['total_active'] = (
             self.data[f'Confirmed'] - self.data['Recovered']) - self.data['Deceased']
         # Growth data
@@ -197,7 +199,7 @@ class DataTestOverall:
 
     # @st.cache
     def preprocess(self):
-        self.data['daily_test'] = self.data['Sample Reported today']
+        self.data['daily_test'] = self.data['Sample Reported today'].apply(lambda x: int(str(x).replace(',', '')))
 
     # @st.cache
     def process(self):

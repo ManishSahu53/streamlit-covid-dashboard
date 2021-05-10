@@ -243,7 +243,7 @@ class DataVaccineState:
 
         total_vaccine = self.data['Total Doses Administered'].values
         total_covaxin = self.data['Total Covaxin Administered'].values
-        total_covidshield = self.data['Total Covaxin Administered'].values
+        total_covidshield = self.data['Total CoviShield Administered'].values
 
         total_18_30 = self.data['18-30 years (Age)'].values
         total_30_45 = self.data['30-45 years (Age)'].values

@@ -458,10 +458,12 @@ elif what == 'Vaccines':
     with col2:
         x = data_vaccine['date'][-30:]
         y = [
-            data_vaccine['daily_18_30'].values[-30:], data_vaccine['daily_30_45'].values[-30:],
-            data_vaccine['daily_45_60'].values[-30:], data_vaccine['daily_60_100'].values[-30:]
+            data_vaccine['daily_18_45'].values[-30:], 
+            # data_vaccine['daily_30_45'].values[-30:],
+            data_vaccine['daily_45_60'].values[-30:], 
+            data_vaccine['daily_60_100'].values[-30:]
         ]
-        names = ['18-30 Age', '30-45 Age', '45-60 Age', 'Above 60 Age']
+        names = ['18-45 Age', '45-60 Age', 'Above 60 Age']
 
         title = 'Age Group wise Vaccine Distribution'
         st.plotly_chart(custom_plot.plot_bar(
@@ -473,10 +475,12 @@ elif what == 'Vaccines':
     with pie1:
         st.markdown("<h3 style='text-align: center;'>Age wise Distribution</h2>",
                     unsafe_allow_html=True)
-        labels = ['18-30 years',  '30-45 years', '45-60 years', '60+ years']
+        labels = ['18-45 years', '45-60 years', '60+ years']
         values = [
-            data_vaccine['18-30 years (Age)'].values[-1], data_vaccine['30-45 years (Age)'].values[-1],
-            data_vaccine['45-60 years (Age)'].values[-1], data_vaccine['60+ years (Age)'].values[-1]
+            data_vaccine['18-45 years (Age)'].values[-1], 
+            # data_vaccine['30-45 years (Age)'].values[-1],
+            data_vaccine['45-60 years (Age)'].values[-1], 
+            data_vaccine['60+ years (Age)'].values[-1]
         ]
 
         pie1.plotly_chart(custom_plot.plot_population(
@@ -515,7 +519,7 @@ elif what == 'Vaccines':
 else:
     st.header(f'Please select from options: {options}')
 
-st.write("**:beer: Buy me a [beer])**")
+st.write("**:beer: Buy me a [beer]**")
 expander = st.beta_expander("This app is developed by Manish Sahu.")
 expander.write(
     "Contact me on [Linkedin](https://www.linkedin.com/in/manishsahuiitbhu/)")

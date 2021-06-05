@@ -255,8 +255,8 @@ class DataVaccineState:
         total_covaxin = self.data['Total Covaxin Administered'].values
         total_covidshield = self.data['Total CoviShield Administered'].values
 
-        total_18_30 = self.data['18-30 years (Age)'].values
-        total_30_45 = self.data['30-45 years (Age)'].values
+        total_18_45 = self.data['18-45 years (Age)'].values
+        # total_30_45 = self.data['30-45 years (Age)'].values
         total_45_60 = self.data['45-60 years (Age)'].values
         total_60_100 = self.data['60+ years (Age)'].values
 
@@ -275,8 +275,8 @@ class DataVaccineState:
         daily_covaxin = [total_covaxin[0]]
         daily_covidshield = [total_covidshield[0]]
 
-        daily_18_30 = [total_18_30[0]]
-        daily_30_45 = [total_30_45[0]]
+        daily_18_45 = [total_18_45[0]]
+        # daily_30_45 = [total_30_45[0]]
         daily_45_60 = [total_45_60[0]]
         daily_60_100 = [total_60_100[0]]
 
@@ -296,8 +296,8 @@ class DataVaccineState:
                 daily_covidshield.append(max(
                     total_covidshield[i] - total_covidshield[i-1], 0))
 
-                daily_18_30.append(max(total_18_30[i] - total_18_30[i-1], 0))
-                daily_30_45.append(max(total_30_45[i] - total_30_45[i-1], 0))
+                daily_18_45.append(max(total_18_45[i] - total_18_45[i-1], 0))
+                # daily_30_45.append(max(total_30_45[i] - total_30_45[i-1], 0))
                 daily_45_60.append(max(total_45_60[i] - total_45_60[i-1], 0))
                 daily_60_100.append(max(total_60_100[i] - total_60_100[i-1], 0))
 
@@ -315,8 +315,8 @@ class DataVaccineState:
                 daily_covaxin.append(total_covaxin[i])
                 daily_covidshield.append(total_covidshield[i])
 
-                daily_18_30.append(total_18_30[i])
-                daily_30_45.append(total_30_45[i])
+                daily_18_45.append(total_18_45[i])
+                # daily_30_45.append(total_30_45[i])
                 daily_45_60.append(total_45_60[i])
                 daily_60_100.append(total_60_100[i])
 
@@ -337,8 +337,8 @@ class DataVaccineState:
         self.data['daily_covaxin'] = daily_covaxin
         self.data['daily_covidshield'] = daily_covidshield
 
-        self.data['daily_18_30'] = daily_18_30
-        self.data['daily_30_45'] = daily_30_45
+        self.data['daily_18_45'] = daily_18_45
+        # self.data['daily_30_45'] = daily_30_45
         self.data['daily_45_60'] = daily_45_60
         self.data['daily_60_100'] = daily_60_100
 

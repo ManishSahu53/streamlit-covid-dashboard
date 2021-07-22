@@ -477,10 +477,10 @@ elif what == 'Vaccines':
                     unsafe_allow_html=True)
         labels = ['18-45 years', '45-60 years', '60+ years']
         values = [
-            data_vaccine['18-45 years (Age)'].values[-1], 
+            data_vaccine['18-44 Years (Doses Administered)'].values[-1], 
             # data_vaccine['30-45 years (Age)'].values[-1],
-            data_vaccine['45-60 years (Age)'].values[-1], 
-            data_vaccine['60+ years (Age)'].values[-1]
+            data_vaccine['45-60 Years (Doses Administered)'].values[-1], 
+            data_vaccine['60+ Years (Doses Administered)'].values[-1]
         ]
 
         pie1.plotly_chart(custom_plot.plot_population(

@@ -420,7 +420,7 @@ elif what == 'Vaccines':
     with title3:
         st.markdown("<h3 style='text-align: center;'>Total Vaccine Sites</h2>",
                     unsafe_allow_html=True)
-        value = int(data_vaccine['Total Sites '].values[-1])
+        value = int(data_vaccine[' Sites '].values[-1])
         st.markdown(
             f"<h1 style='text-align: center; color: red;'>{value:,}</h1>", unsafe_allow_html=True)
 

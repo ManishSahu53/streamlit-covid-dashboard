@@ -402,8 +402,8 @@ elif what == 'Vaccines':
 
     # Type of Vaccines Administered
     with pie2:
-        x = data_vaccine['Total Covaxin Administered'].values[-1]
-        y = data_vaccine['Total CoviShield Administered'].values[-1]
+        x = data_vaccine[' Covaxin (Doses Administered)'].values[-1]
+        y = data_vaccine['CoviShield (Doses Administered)'].values[-1]
         labels = ['Covaxin Vaccine',  'CovidShield Vaccine']
         st.plotly_chart(custom_plot.plot_population(
             [x, y], labels, area, height=180, t=0), use_container_width=True)

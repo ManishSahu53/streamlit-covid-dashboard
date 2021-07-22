@@ -493,8 +493,8 @@ elif what == 'Vaccines':
                     unsafe_allow_html=True)
         labels = ['Covaxin', 'CoviShield']
         values = [
-            data_vaccine['Total Covaxin Administered'].values[-1],
-            data_vaccine['Total CoviShield Administered'].values[-1],
+            data_vaccine[' Covaxin (Doses Administered)'].values[-1],
+            data_vaccine['CoviShield (Doses Administered)'].values[-1],
         ]
 
         pie2.plotly_chart(custom_plot.plot_population(

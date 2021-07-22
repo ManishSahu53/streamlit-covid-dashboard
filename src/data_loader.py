@@ -267,7 +267,7 @@ class DataVaccineState:
         total_first = self.data['First Dose Administered'].values
         total_second = self.data['Second Dose Administered'].values
 
-        total_sites = self.data['Total Sites '].values
+        total_sites = self.data[' Sites '].values
 
         states = self.data['State'].values
 

@@ -107,7 +107,7 @@ logging.info(f'Processing for Date: {current_date}')
 
 default_what_map = {'Infection': 0, 'Vaccines': 1}
 
-col1, col2, _, col3 = st.beta_columns([2, 2, 8, 1, ])
+col1, col2, _, col3 = st.columns([2, 2, 8, 1, ])
 query_params = st.experimental_get_query_params()
 
 col3.write("**[Linkedin](https://www.linkedin.com/in/manishsahuiitbhu/)<br>[:beer:]**",
@@ -121,7 +121,7 @@ if what == 'Infection':
     st.header('Real time data updated till {}'.format(
         current_date.strftime('%Y-%m-%d')))
 
-    col1, line, col3, col4, col5, col6, col7, col8 = st.beta_columns(
+    col1, line, col3, col4, col5, col6, col7, col8 = st.columns(
         [10, 1, 8, 8, 8, 8, 8, 8])
     line.markdown(LINE, unsafe_allow_html=True)
 
@@ -249,7 +249,7 @@ if what == 'Infection':
         graph_data = data_state_cls.data[data_state_cls.data['State'] == area]
         graph_positive_data = data_state_cls.data
 
-    coln, _, _, _, _, _, _ = st.beta_columns([8, 4, 8, 8, 8, 8, 8])
+    coln, _, _, _, _, _, _ = st.columns([8, 4, 8, 8, 8, 8, 8])
     type_of_timeseries = coln.selectbox(
         "", ['Daily Cases', 'Daily Recoveries', 'Daily Deaths', 'Daily Tests', 'Positivity Rate'])
 
@@ -376,7 +376,7 @@ elif what == 'Vaccines':
     data_vaccine = data_vaccine_cls.data[(data_vaccine_cls.data['State'] == area) & (
         data_vaccine_cls.data['date'] <= current_date)]
 
-    pie1, title1, line, pie2, title2, title3, title4 = st.beta_columns([
+    pie1, title1, line, pie2, title2, title3, title4 = st.columns([
                                                                        2, 4, 1, 2, 4, 4, 4])
     line.markdown(LINE, unsafe_allow_html=True)
 
@@ -441,7 +441,7 @@ elif what == 'Vaccines':
     st.plotly_chart(custom_plot.plot_bar(x=x, y=y, name=names,
                                          title=title), use_container_width=True)
 
-    col1, col2 = st.beta_columns(2)
+    col1, col2 = st.columns(2)
 
     # daily_covaxin', 'daily_covidshield
     with col1:
@@ -469,7 +469,7 @@ elif what == 'Vaccines':
         st.plotly_chart(custom_plot.plot_bar(
             x=x, y=y, name=names, title=title), use_container_width=True)
 
-    pie1, pie2, pie3 = st.beta_columns(3)
+    pie1, pie2, pie3 = st.columns(3)
 
     # Age wise Distribution
     with pie1:
